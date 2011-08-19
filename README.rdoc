@@ -1,0 +1,43 @@
+= Description
+
+A work queue is designed to coordinate work between a producer and a pool of worker threads.
+When some task needs to be performed, the producer adds an object containing the task routine to the work queue.
+Eventually, one of the worker threads removes the object from the work queue and executes the routine.
+If the work queue is empty, the worker thread will exit, if more jobs are added to the queue additional worker 
+threads will be created up to the configured maximum.
+
+Work queues are useful for several reasons:
+* To easily perform tasks asynchronously and concurrently in your application;
+* To let you focus on the work you actually want to perform without having to worry about the thread creation and management;
+* To minimize overhead, by reusing previously constructed threads rather than creating new ones;
+* To bound resource use, by setting a limit on the maximum number of simultaneously executing threads;
+
+= Requirements
+
+JRuby
+
+= Usage
+
+Install the gem:
+
+  gem install simple_work_queue
+
+Run the code:
+
+  require 'rubygems'
+  require 'simple_work_queue'
+  wq = SimpleWorkQueue.new
+  wq.enqueue_b { puts "Hello from the SimpleWorkQueue" }
+  wq.join
+
+Note that you generally want to bound the number of worker threads:
+
+  # Limit the maximum number of simultaneous worker threads
+  SimpleWorkQueue.new(10)
+
+= History
+
+SimpleWorkQueue is a fork of WorkQueue by Miguel Fonseca. SimpleWorkQueue removes the time out and bounded task queue.
+The timeout created issues under the concurrency implementation in JRuby. The time out mechanism was replaced using a
+non-blocking queue from the java.util.concurrent library. If a worker thread attempts to remove a task from the task queue
+and it is empty it will exit the worker thread.
